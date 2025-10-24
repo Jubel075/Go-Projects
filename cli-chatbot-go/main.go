@@ -2,19 +2,17 @@ package main
 
 import (
 	"bufio"
+	"cli_chatbot_go/responses"
 	"fmt"
 	"os"
 	"strings"
-	"cli_chatbot_go/responses"
 )
 
 func printWelcome() {
 	fmt.Println("============================")
 	fmt.Println(" Claude/LazyVim-Style CLI Chatbot ")
-	fmt.Println("============================
-")
-	fmt.Println("Type '/exit' to quit.
-")
+	fmt.Println("============================")
+	fmt.Println("Type '/exit' to quit.")
 }
 
 func main() {
@@ -23,8 +21,7 @@ func main() {
 
 	for {
 		fmt.Print("You > ")
-		input, _ := reader.ReadString('
-')
+		input, _ := reader.ReadString(' ')
 		input = strings.TrimSpace(input)
 
 		if input == "/exit" {
@@ -33,8 +30,6 @@ func main() {
 		}
 
 		resp := responses.GetResponse(input)
-		fmt.Printf("Bot > %s
-
-", resp)
+		fmt.Printf("Bot > %s", resp)
 	}
 }
