@@ -93,9 +93,9 @@ func main() {
 
 		// Handle exit command
 		if input == "exit" || input == "/exit" {
-			fmt.Printf("\n%s%s╭─────────────────────────────────────────────────────────╮%s\n", bold, colorPurple, colorReset)
-			fmt.Printf("%s%s│%s  %sThanks for chatting! See you next time. %s✨%s           %s%s│%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
-			fmt.Printf("%s%s╰─────────────────────────────────────────────────────────╯%s\n\n", bold, colorPurple, colorReset)
+			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
+			fmt.Printf("%s%s%s  %sThanks for chatting! See you next time. %s✨%s           %s%s%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
+			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
 			os.Exit(0)
 		}
 

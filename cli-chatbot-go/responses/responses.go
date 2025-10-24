@@ -8,12 +8,9 @@ import (
 )
 
 const (
-	colorReset  = "\033[0m"
-	colorBlue   = "\033[38;5;75m"
-	colorGreen  = "\033[38;5;150m"
-	colorOrange = "\033[38;5;215m"
-	colorPurple = "\033[38;5;141m"
-	bold        = "\033[1m"
+	colorReset = "\033[0m"
+	colorGreen = "\033[38;5;150m"
+	bold       = "\033[1m"
 )
 
 var replyMap = map[string]string{
