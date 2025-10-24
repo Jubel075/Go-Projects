@@ -1,0 +1,5 @@
+responses:
+  hello: "Hi there! How can I assist you today?"
+  help: "Available commands: hello, help, info, exit."
+  info: "This is a lightweight CLI chatbot inspired by Claude and LazyVim. Future updates will include AI integration!"
+  exit: "Exiting the chat..."
