@@ -2,18 +2,22 @@ package main
 
 import (
 	"bufio"
+	"cli_chatbot_go/ai"
 	"cli_chatbot_go/responses"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 const (
 	colorReset  = "\033[0m"
 	colorBlue   = "\033[38;5;75m"
-	colorGray   = "\033[38;5;243m"
 	colorGreen  = "\033[38;5;150m"
+	colorGray   = "\033[38;5;243m"
 	colorOrange = "\033[38;5;215m"
 	colorPurple = "\033[38;5;141m"
 	colorWhite  = "\033[38;5;255m"
@@ -34,6 +38,14 @@ func printWelcome() {
 	fmt.Printf("\n")
 	fmt.Printf("     %s%s⚡ CLI CHATBOT%s\n", bold, colorOrange, colorReset)
 	fmt.Printf("     %s%sInspired by Claude Code & LazyVim%s\n", dim, colorBlue, colorReset)
+
+	// Show AI status
+	if ai.IsEnabled() {
+		fmt.Printf("     %s%s🤖 AI Mode: Enabled (Gemini)%s\n", dim, colorGreen, colorReset)
+	} else {
+		fmt.Printf("     %s%s💡 AI Mode: Disabled (Fallback responses)%s\n", dim, colorGray, colorReset)
+	}
+
 	fmt.Printf("\n")
 	fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
 	fmt.Printf("\n")
@@ -74,6 +86,17 @@ func showTypingIndicator() {
 }
 
 func main() {
+	// Load environment variables
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using default settings")
+	}
+
+	// Initialize AI
+	if err := ai.Initialize(); err != nil {
+		log.Printf("AI initialization: %v\n", err)
+	}
+	defer ai.Close()
+
 	printWelcome()
 	reader := bufio.NewReader(os.Stdin)
 
@@ -93,9 +116,9 @@ func main() {
 
 		// Handle exit command
 		if input == "exit" || input == "/exit" {
-			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
-			fmt.Printf("%s%s%s  %sThanks for chatting! See you next time. %s✨%s           %s%s%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
-			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
+			fmt.Printf("\n%s%s╭─────────────────────────────────────────────────────────╮%s\n", bold, colorPurple, colorReset)
+			fmt.Printf("%s%s│%s  %sThanks for chatting! See you next time. %s✨%s           %s%s│%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
+			fmt.Printf("%s%s╰─────────────────────────────────────────────────────────╯%s\n\n", bold, colorPurple, colorReset)
 			os.Exit(0)
 		}
 
@@ -111,8 +134,27 @@ func main() {
 		// Simulate typing
 		showTypingIndicator()
 
-		// Get and display response
-		resp := responses.GetResponse(input)
+		// Get response - try AI first, fallback to predefined responses
+		var resp string
+
+		// Check if it's a built-in command first
+		if responses.IsCommand(input) {
+			resp = responses.GetResponse(input)
+		} else if ai.IsEnabled() {
+			// Try to get AI response
+			aiResp, err := ai.GetResponse(input)
+			if err != nil {
+				log.Printf("AI error: %v, falling back to predefined responses\n", err)
+				resp = responses.GetResponse(input)
+			} else {
+				resp = aiResp
+			}
+		} else {
+			// Fallback to predefined responses
+			resp = responses.GetResponse(input)
+		}
+
+		// Display response
 		printMessage("Assistant", resp, true)
 	}
 }

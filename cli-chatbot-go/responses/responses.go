@@ -8,17 +8,35 @@ import (
 )
 
 const (
-	colorReset = "\033[0m"
-	colorGreen = "\033[38;5;150m"
-	bold       = "\033[1m"
+	colorReset  = "\033[0m"
+	colorBlue   = "\033[38;5;75m"
+	colorGreen  = "\033[38;5;150m"
+	colorOrange = "\033[38;5;215m"
+	colorPurple = "\033[38;5;141m"
+	bold        = "\033[1m"
 )
+
+var commands = map[string]bool{
+	"hello":     true,
+	"hi":        true,
+	"hey":       true,
+	"help":      true,
+	"info":      true,
+	"time":      true,
+	"joke":      true,
+	"quote":     true,
+	"thanks":    true,
+	"thank you": true,
+	"bye":       true,
+	"goodbye":   true,
+}
 
 var replyMap = map[string]string{
 	"hello":     "Hi there! 👋 How can I assist you today?",
 	"hi":        "Hello! Great to see you. What can I help you with?",
 	"hey":       "Hey! What's on your mind?",
-	"help":      fmt.Sprintf("Available commands:\n  %s%shelp%s - Show this help message\n  %s%sinfo%s - Learn about this chatbot\n  %s%stime%s - Get current time\n  %s%sjoke%s - Hear a programming joke\n  %s%squote%s - Get an inspiring quote\n  %s%sclear%s - Clear the screen\n  %s%sexit%s - Exit the chatbot", bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset),
-	"info":      fmt.Sprintf("✨ %sCLI Chatbot v1.0%s\n\nA modern command-line chatbot inspired by Claude Code and LazyVim aesthetics.\nBuilt with Go for speed and simplicity.\n\nFeatures:\n  • Clean, colorful interface\n  • Real-time responses\n  • Extensible command system\n  • Future AI integration planned!", bold, colorReset),
+	"help":      fmt.Sprintf("Available commands:\n  %s%shelp%s - Show this help message\n  %s%sinfo%s - Learn about this chatbot\n  %s%stime%s - Get current time\n  %s%sjoke%s - Hear a programming joke\n  %s%squote%s - Get an inspiring quote\n  %s%sclear%s - Clear the screen\n  %s%sexit%s - Exit the chatbot\n\n  💡 Tip: When AI is enabled, you can ask me anything!", bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset, bold, colorGreen, colorReset),
+	"info":      fmt.Sprintf("✨ %sCLI Chatbot v2.0%s\n\nA modern command-line chatbot inspired by Claude Code and LazyVim aesthetics.\nBuilt with Go for speed and simplicity.\n\nFeatures:\n  • Clean, colorful interface\n  • Real-time responses\n  • Google Gemini AI integration\n  • Extensible command system\n  • Smart fallback responses", bold, colorReset),
 	"time":      getCurrentTime(),
 	"joke":      getRandomJoke(),
 	"quote":     getRandomQuote(),
@@ -63,6 +81,12 @@ func getRandomJoke() string {
 
 func getRandomQuote() string {
 	return quotes[rand.Intn(len(quotes))]
+}
+
+// IsCommand checks if the input is a built-in command
+func IsCommand(input string) bool {
+	input = strings.ToLower(strings.TrimSpace(input))
+	return commands[input]
 }
 
 func GetResponse(input string) string {
@@ -118,7 +142,7 @@ func GetResponse(input string) string {
 	}
 
 	if containsAny(input, []string{"who are you", "what are you", "your name"}) {
-		return fmt.Sprintf("I'm a CLI chatbot built with Go! Think of me as a helpful assistant in your terminal. Type %s%shelp%s to see what I can do!", bold, colorGreen, colorReset)
+		return fmt.Sprintf("I'm a CLI chatbot built with Go and powered by Google Gemini AI! Type %s%shelp%s to see what I can do!", bold, colorGreen, colorReset)
 	}
 
 	// Default response
