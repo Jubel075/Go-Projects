@@ -16,11 +16,11 @@ import (
 const (
 	colorReset  = "\033[0m"
 	colorBlue   = "\033[38;5;75m"
-	colorGreen  = "\033[38;5;150m"
 	colorGray   = "\033[38;5;243m"
 	colorOrange = "\033[38;5;215m"
 	colorPurple = "\033[38;5;141m"
 	colorWhite  = "\033[38;5;255m"
+	colorGreen  = "\033[38;5;150m"
 	bold        = "\033[1m"
 	dim         = "\033[2m"
 )
@@ -77,12 +77,23 @@ func printPrompt() {
 }
 
 func showTypingIndicator() {
+	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
 	fmt.Printf("\n%s%s┌─ %sAssistant %s• thinking%s\n", dim, colorGray, colorBlue, colorGray, colorReset)
-	fmt.Printf("%s%s│%s  %s●%s %s●%s %s●%s", dim, colorGray, colorReset, colorGray, colorReset, colorGray, colorReset, colorGray, colorReset)
-	time.Sleep(300 * time.Millisecond)
-	fmt.Print("\r\033[K")
-	fmt.Print("\033[1A\r\033[K")
-	fmt.Print("\033[1A\r\033[K")
+	fmt.Printf("%s%s│%s  ", dim, colorGray, colorReset)
+
+	// Animate for a short duration
+	iterations := 8
+	for i := 0; i < iterations; i++ {
+		frame := frames[i%len(frames)]
+		fmt.Printf("\r%s%s│%s  %s%s%s Thinking...", dim, colorGray, colorReset, colorPurple, frame, colorReset)
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	// Clear the loading lines
+	fmt.Print("\r\033[K")        // Clear current line
+	fmt.Print("\033[1A\r\033[K") // Move up and clear
+	fmt.Print("\033[1A\r\033[K") // Move up and clear again
 }
 
 func main() {
@@ -116,9 +127,9 @@ func main() {
 
 		// Handle exit command
 		if input == "exit" || input == "/exit" {
-			fmt.Printf("\n%s%s╭─────────────────────────────────────────────────────────╮%s\n", bold, colorPurple, colorReset)
-			fmt.Printf("%s%s│%s  %sThanks for chatting! See you next time. %s✨%s           %s%s│%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
-			fmt.Printf("%s%s╰─────────────────────────────────────────────────────────╯%s\n\n", bold, colorPurple, colorReset)
+			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
+			fmt.Printf("%s%s%s  %sThanks for chatting! See you next time. %s✨%s           %s%s%s\n", bold, colorPurple, colorReset, colorWhite, colorOrange, colorReset, bold, colorPurple, colorReset)
+			fmt.Printf("  %s%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", bold, colorPurple, colorReset)
 			os.Exit(0)
 		}
 

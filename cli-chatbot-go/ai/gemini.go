@@ -71,11 +71,18 @@ func GetResponse(prompt string) (string, error) {
 		return "", fmt.Errorf("AI is not enabled or initialized")
 	}
 
+	// Add system context to make responses more CLI-friendly
+	systemPrompt := "You are a helpful CLI assistant. Provide clear, concise responses. " +
+		"Use markdown sparingly - prefer plain text with occasional formatting. " +
+		"Keep responses focused and terminal-friendly."
+
+	fullPrompt := systemPrompt + "\n\nUser: " + prompt
+
 	// Use the new API format: client.Models.GenerateContent()
 	result, err := geminiClient.client.Models.GenerateContent(
 		geminiClient.ctx,
 		geminiClient.modelName,
-		genai.Text(prompt),
+		genai.Text(fullPrompt),
 		nil,
 	)
 	if err != nil {
