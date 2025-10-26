@@ -58,7 +58,7 @@ func printWelcome() {
 	fmt.Printf("\n")
 }
 
-func printMessage(sender, message string, isBot bool) {
+func printMessage(message string, isBot bool) {
 	timestamp := time.Now().Format("15:04")
 
 	if isBot {
@@ -76,24 +76,27 @@ func printPrompt() {
 	fmt.Printf("%s%s❯%s ", bold, colorPurple, colorReset)
 }
 
-func showTypingIndicator() {
+func showLoadingIndicator(done chan bool, message string) {
 	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	i := 0
 
-	fmt.Printf("\n%s%s┌─ %sAssistant %s• thinking%s\n", dim, colorGray, colorBlue, colorGray, colorReset)
+	// Print header for the assistant while loading
+	fmt.Printf("\n%s%s┌─ %sAssistant %s• %s%s\n", dim, colorGray, colorBlue, colorGray, message, colorReset)
 	fmt.Printf("%s%s│%s  ", dim, colorGray, colorReset)
 
-	// Animate for a short duration
-	iterations := 8
-	for i := 0; i < iterations; i++ {
-		frame := frames[i%len(frames)]
-		fmt.Printf("\r%s%s│%s  %s%s%s Thinking...", dim, colorGray, colorReset, colorPurple, frame, colorReset)
-		time.Sleep(100 * time.Millisecond)
+	for {
+		select {
+		case <-done:
+			// Clear the loading line
+			fmt.Print("\r\033[K")
+			return
+		default:
+			frame := frames[i%len(frames)]
+			fmt.Printf("\r%s%s %s%s %s", colorPurple, frame, colorReset, message, colorReset)
+			time.Sleep(80 * time.Millisecond)
+			i++
+		}
 	}
-
-	// Clear the loading lines
-	fmt.Print("\r\033[K")        // Clear current line
-	fmt.Print("\033[1A\r\033[K") // Move up and clear
-	fmt.Print("\033[1A\r\033[K") // Move up and clear again
 }
 
 func main() {
@@ -120,7 +123,6 @@ func main() {
 		}
 
 		input = strings.TrimSpace(input)
-
 		if input == "" {
 			continue
 		}
@@ -140,10 +142,7 @@ func main() {
 		}
 
 		// Show user message
-		printMessage("You", input, false)
-
-		// Simulate typing
-		showTypingIndicator()
+		printMessage(input, false)
 
 		// Get response - try AI first, fallback to predefined responses
 		var resp string
@@ -151,21 +150,84 @@ func main() {
 		// Check if it's a built-in command first
 		if responses.IsCommand(input) {
 			resp = responses.GetResponse(input)
-		} else if ai.IsEnabled() {
-			// Try to get AI response
-			aiResp, err := ai.GetResponse(input)
-			if err != nil {
-				log.Printf("AI error: %v, falling back to predefined responses\n", err)
-				resp = responses.GetResponse(input)
-			} else {
-				resp = aiResp
-			}
-		} else {
-			// Fallback to predefined responses
-			resp = responses.GetResponse(input)
+
+			// Simple loading for commands
+			done := make(chan bool)
+			go showLoadingIndicator(done, "processing")
+			time.Sleep(300 * time.Millisecond)
+			done <- true
+
+			// Clear the spinner header line and print the response
+			fmt.Print("\033[1A\r\033[K")
+			printMessage(resp, true)
+
+			continue
 		}
 
-		// Display response
-		printMessage("Assistant", resp, true)
+		// If AI enabled, stream; otherwise fallback
+		if ai.IsEnabled() {
+			// Show "sending prompt..." indicator briefly
+			sendDone := make(chan bool)
+			go showLoadingIndicator(sendDone, "sending prompt")
+			time.Sleep(350 * time.Millisecond)
+			sendDone <- true
+
+			// Start "thinking" spinner
+			thinkDone := make(chan bool)
+			go showLoadingIndicator(thinkDone, "thinking")
+
+			// Collect response
+			var fullResponse strings.Builder
+			timestamp := time.Now().Format("15:04")
+			firstChunk := true
+
+			err := ai.StreamResponse(input,
+				func(chunk string) {
+					if firstChunk {
+						// Stop the thinking spinner
+						thinkDone <- true
+
+						// Clear spinner header
+						fmt.Print("\033[1A\r\033[K")
+
+						// Print actual assistant header (no leading \n)
+						fmt.Printf("%s%s┌─ %sAssistant %s• %s%s%s\n", dim, colorGray, colorBlue, colorGray, timestamp, colorReset, colorReset)
+
+						// Print initial content prefix and first chunk
+						fmt.Printf("%s%s│%s  %s", dim, colorGray, colorReset, chunk)
+						firstChunk = false
+					} else {
+						// Print subsequent chunks raw (streaming effect)
+						fmt.Print(chunk)
+					}
+					fullResponse.WriteString(chunk)
+				},
+				func(finalText string) {
+					// Close the box (no re-printing to avoid duplicates)
+					fmt.Printf("\n%s%s└─%s\n\n", dim, colorGray, colorReset)
+				},
+			)
+
+			if err != nil {
+				// Stop spinner if not already
+				if firstChunk {
+					thinkDone <- true
+				}
+				log.Printf("AI error: %v, falling back to predefined responses\n", err)
+				resp = responses.GetResponse(input) + "\n(AI error occurred; using fallback)"
+				printMessage(resp, true)
+			}
+
+		} else {
+			// Fallback to predefined responses
+			done := make(chan bool)
+			go showLoadingIndicator(done, "processing")
+			time.Sleep(300 * time.Millisecond)
+			done <- true
+
+			resp = responses.GetResponse(input)
+			fmt.Print("\033[1A\r\033[K")
+			printMessage(resp, true)
+		}
 	}
 }
