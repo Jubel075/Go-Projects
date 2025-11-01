@@ -35,7 +35,6 @@ func Initialize() error {
 		aiEnabled = false
 		return nil
 	}
-
 	ctx := context.Background()
 
 	// Use ClientConfig for explicit API key and backend (avoids redundant env set)
