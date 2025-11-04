@@ -5,9 +5,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/jubel075/cli-cobra/todo"
 	"github.com/spf13/cobra"
 )
+
+var priority int
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
@@ -27,15 +31,29 @@ Examples:
 
 If no description is provided, the command will prompt you to enter one interactively.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, x := range args {
-			fmt.Println("Added task:", x)
+		fmt.Println("Using data file:", dataFile)
+		var items = []todo.Item{}
+		items, err := todo.ReadItems(dataFile)
+		if err != nil {
+			log.Printf("%v", err)
 		}
+		for _, x := range args {
+			item := todo.Item{Text: x}
+			item.SetPtiority(priority)
+			items = append(items, item)
+			fmt.Println("Added task:", item)
+		}
+		err = todo.SaveItems(dataFile, items)
+		if err != nil {
+			log.Printf("%v", err)
+		}
+		// fmt.Printf("%#v\n", items)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
+	addCmd.Flags().IntVarP(&priority, "priority", "p", 2, "Priority of the task (1=high, 2=medium, 3=low)")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

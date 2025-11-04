@@ -23,13 +23,17 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
+	// "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var dataFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -57,10 +61,24 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	//Get the project directory.
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("Could not get current working directory: %v", err)
+	}
 
+	dataFile = filepath.Join(cwd, ".todo.json")
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
+
+	// home, err := homedir.Dir()
+	// if err != nil {
+	// 	log.Println("Unable to find home directory, please set --datafile flag")
+	// 	os.Exit(1)
+	// }
+
+	rootCmd.PersistentFlags().StringVar(&dataFile, "datafile", dataFile, "data file to store todos")
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli-cobra.yaml)")
 
