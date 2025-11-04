@@ -108,7 +108,7 @@ To become proficient enough in Go to **build production-ready tools and systems*
 💼 Engineering & Process Enthusiast | 🐹 Go Learner | ⚙️ Builder
 
 [![GitHub](https://img.shields.io/badge/GitHub-@GuilianKasandikromo-black?logo=github)](https://github.com/Jubel075)  
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](www.linkedin.com/in/jubel075)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/jubel075)
 
 ---
 
