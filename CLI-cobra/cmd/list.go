@@ -16,6 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	doneOpt bool
+	allOpt  bool
+)
+
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
@@ -53,7 +58,7 @@ instead of printing a blank table. This ensures you always get useful
 feedback when running the command.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Using data file:", dataFile)
+		// items, err := todo.ReadItems(viper.GetString("datafile"))
 		items, err := todo.ReadItems(dataFile)
 		if err != nil {
 			log.Printf("%v", err)
@@ -71,7 +76,9 @@ feedback when running the command.`,
 
 		// Print each item with its label
 		for _, i := range items {
-			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", i.Label(), i.PrettyP(), i.Text, i.PrettyDone())
+			if i.Done || allOpt == doneOpt {
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", i.Label(), i.PrettyP(), i.Text, i.PrettyDone())
+			}
 		}
 
 		// Flush to output
@@ -81,6 +88,9 @@ feedback when running the command.`,
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+
+	listCmd.Flags().BoolVarP(&doneOpt, "done", "d", false, "List only completed tasks")
+	listCmd.Flags().BoolVarP(&allOpt, "all", "a", false, "List all tasks")
 
 	// Here you will define your flags and configuration settings.
 

@@ -27,13 +27,14 @@ import (
 	"os"
 	"path/filepath"
 
-	// "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
 var dataFile string
+var ignoreConfig bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -61,52 +62,51 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-	//Get the project directory.
-	cwd, err := os.Getwd()
+
+	home, err := homedir.Dir()
 	if err != nil {
 		log.Fatalf("Could not get current working directory: %v", err)
 	}
 
-	dataFile = filepath.Join(cwd, ".todo.json")
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// home, err := homedir.Dir()
-	// if err != nil {
-	// 	log.Println("Unable to find home directory, please set --datafile flag")
-	// 	os.Exit(1)
-	// }
+	dataFile = filepath.Join(home, ".todo.json")
 
 	rootCmd.PersistentFlags().StringVar(&dataFile, "datafile", dataFile, "data file to store todos")
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cli-cobra.yaml)")
+	rootCmd.PersistentFlags().BoolVar(&ignoreConfig, "ignore-config", false, "ignore configuration file and use default settings")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	if ignoreConfig || os.Getenv("IGNORE_CONFIG") == "1" {
+		fmt.Fprintln(os.Stderr, "Ignoring config file and environment variables, using default settings")
+		home, err := os.UserHomeDir()
+		cobra.CheckErr(err)
+		dataFile = filepath.Join(home, ".todo.json")
+		return
+	}
+
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".cli-cobra" (without extension).
 		viper.AddConfigPath(home)
 		viper.SetConfigType("yaml")
 		viper.SetConfigName(".cli-cobra")
+		viper.SetDefault("datafile", filepath.Join(home, ".todo.json"))
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.AutomaticEnv()
+	viper.SetEnvPrefix("new")
 
-	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		dataFile = viper.GetString("datafile")
+		fmt.Fprintln(os.Stderr, "Using data file:", dataFile)
+	} else {
+		fmt.Fprintln(os.Stderr, "No config file found, using default data file.")
 	}
 }

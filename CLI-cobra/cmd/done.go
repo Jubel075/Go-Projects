@@ -20,6 +20,9 @@ var doneCmd = &cobra.Command{
 	Short:   "mark a task as done",
 	Run: func(cmd *cobra.Command, args []string) {
 		items, err := todo.ReadItems(dataFile)
+		if err != nil {
+			log.Printf("%v", err)
+		}
 		i, err := strconv.Atoi(args[0])
 		if err != nil {
 			fmt.Println("Invalid task number:", args[0], err)

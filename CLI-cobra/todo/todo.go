@@ -20,9 +20,9 @@ func (s ByPriority) Len() int      { return len(s) }
 func (s ByPriority) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 func (s ByPriority) Less(i, j int) bool {
 	if s[i].Done != s[j].Done {
-		return !s[i].Done
+		return s[i].Done
 	}
-	if s[i].Priority == s[j].Priority {
+	if s[i].Priority != s[j].Priority {
 		return s[i].position < s[j].position
 	}
 	return s[i].Priority < s[j].Priority
@@ -83,7 +83,7 @@ func (i Item) Label() string {
 
 func (i *Item) PrettyDone() string {
 	if i.Done {
-		return "[x]"
+		return " [x] "
 	}
-	return "[ ]"
+	return " [ ] "
 }
