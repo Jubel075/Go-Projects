@@ -83,7 +83,7 @@ func (i Item) Label() string {
 
 func (i *Item) PrettyDone() string {
 	if i.Done {
-		return " [x] "
+		return "[x] "
 	}
-	return " [ ] "
+	return "[ ] "
 }

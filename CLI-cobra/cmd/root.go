@@ -44,14 +44,8 @@ var rootCmd = &cobra.Command{
 command line interface application. You can extend this application
 by adding more commands and features as needed. Great for learning
 how to build CLI apps in Go!`,
-
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {

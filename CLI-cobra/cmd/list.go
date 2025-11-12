@@ -58,7 +58,6 @@ instead of printing a blank table. This ensures you always get useful
 feedback when running the command.`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		// items, err := todo.ReadItems(viper.GetString("datafile"))
 		items, err := todo.ReadItems(dataFile)
 		if err != nil {
 			log.Printf("%v", err)
@@ -91,14 +90,4 @@ func init() {
 
 	listCmd.Flags().BoolVarP(&doneOpt, "done", "d", false, "List only completed tasks")
 	listCmd.Flags().BoolVarP(&allOpt, "all", "a", false, "List all tasks")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

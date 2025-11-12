@@ -31,7 +31,6 @@ Examples:
 
 If no description is provided, the command will prompt you to enter one interactively.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Using data file:", dataFile)
 		var items = []todo.Item{}
 		items, err := todo.ReadItems(dataFile)
 		if err != nil {
@@ -47,7 +46,6 @@ If no description is provided, the command will prompt you to enter one interact
 		if err != nil {
 			log.Printf("%v", err)
 		}
-		// fmt.Printf("%#v\n", items)
 	},
 }
 
